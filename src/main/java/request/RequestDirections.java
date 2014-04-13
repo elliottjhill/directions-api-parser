@@ -1,3 +1,5 @@
+package request;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -28,15 +30,21 @@ public class RequestDirections {
 	private static final String API_KEY = "AIzaSyD6wVp9xuWe2ULXw1ghK0FSw8J9OfvTzkw";
 	/** HttpClient instance to be used across all isntance */
 	private static HttpClient client;
+	/** The returned Api Response from the directions API */
+	private ApiResponse apiResponse;
 	
 	// TODO: Add in how to get points A and points B
 	public RequestDirections() {
 		
 	}
 	
-	//TODO: What to have a response as
-	public void getDirections() {
-		
+	/**
+	 * Create and execute the API call to the directions API and parse and return the response.
+	 * @return the Api response from calling this Api call
+	 */
+	public ApiResponse getApiResponse() {
+		makeRequest();
+		return apiResponse;
 	}
 	
 	/**
@@ -69,11 +77,10 @@ public class RequestDirections {
 				while ((i = is.read()) != -1) {
 					sb.append((char) i);
 				}
-				System.out.println(sb.toString());
 				Gson response = new GsonBuilder().setFieldNamingPolicy(
 						FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
-				ApiResponse apiResponse = response.fromJson(sb.toString(), ApiResponse.class);
-				
+				apiResponse = response.fromJson(sb.toString(), ApiResponse.class);
+
 			} catch (IOException ioe) {
 				System.out.println("Exception getting response");
 				ioe.printStackTrace();
@@ -82,16 +89,13 @@ public class RequestDirections {
 			System.out.println("Unexpected response code " + resp.getStatusLine().getStatusCode());
 			return;
 		}
-		
-	
-		// TODO: Create Parser and parse the response
 	}
 	
 	/**
 	 * Get the HttpClient that should be used to make Http requests to the API end point
 	 * @return
 	 */
-	private HttpClient getClient() {
+	private static HttpClient getClient() {
 		if (client == null) {
 			client = HttpClients.createDefault();
 		}
@@ -115,12 +119,4 @@ public class RequestDirections {
 	private String getApiKey() {
 		return API_KEY;
 	}
-	
-	//Currently for simple testing TODO: Delete when necessary 
-	public static void main(String[] args) {
-		RequestDirections rd = new RequestDirections();
-		System.out.println(API_END_POINT+rd.getParameters());
-		rd.makeRequest();
-	}
-
 }

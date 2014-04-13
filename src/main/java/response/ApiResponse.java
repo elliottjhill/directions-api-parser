@@ -26,15 +26,4 @@ public class ApiResponse {
 	public Route[] getRoutes() {
 		return routes;
 	}
-	
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Status = ").append(status).append(",\n")
-			.append("Routes = [");
-		for (Route r : routes) {
-			sb.append(r.toString()).append(",");
-		}
-		sb.append("]");
-		return sb.toString();
-	}
 }

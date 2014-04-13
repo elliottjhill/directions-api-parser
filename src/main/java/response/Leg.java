@@ -15,6 +15,12 @@ public class Leg {
 	private Distance distance;
 	/** The approximate duration of this leg of the journey */
 	private Duration duration;
+	/** The location of the destination */
+	private Location endLocation;
+	/** The location of the origin of this Leg */
+	private Location startLocation;
+	/** All steps for this leg of the journey */
+	private Step[] steps;
 	
 	/**
 	 * Get the start address for this Leg of the route
@@ -48,11 +54,26 @@ public class Leg {
 		return duration;
 	}
 	
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Leg = [startAddress = ").append(startAddress).append(", endAddress = ")
-			.append(endAddress).append("]");
-		
-		return sb.toString();
+	/**
+	 * Get the {@link Location} of the origin of this leg of the journey
+	 * @return the {@link Location} of the origin of this leg
+	 */
+	public Location getStartLocation() {
+		return startLocation;
+	}
+	
+	/**
+	 * Get the {@link Location} of the destination of this leg of the journey
+	 * @return the {@link Location} of the destination of this leg
+	 */
+	public Location getEndLocation() {
+		return endLocation;
+	}
+	/**
+	 * Get all steps for this leg of the journey, to be traveled order
+	 * @return all steps for this leg of the journey, to be traveled order
+	 */
+	public Step[] getSteps() {
+		return steps;
 	}
 }

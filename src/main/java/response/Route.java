@@ -8,6 +8,8 @@ package response;
 public class Route {
 	/** An array of legs for this route, to be traveled in order */
 	private Leg[] legs;
+	/** The copyrights details on this route */
+	private String copyrights;
 	
 	/**
 	 * Get the legs of the route to be traversed in order
@@ -17,13 +19,11 @@ public class Route {
 		return legs;
 	}
 	
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Route [ Legs = [");
-		for (Leg l : legs) {
-			sb.append(l.toString()).append(",");
-		}
-		sb.append("]");
-		return sb.toString();
+	/**
+	 * Get the copyright details for this route
+	 * @return
+	 */
+	public String getCopyrights() {
+		return copyrights;
 	}
 }
