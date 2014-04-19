@@ -19,6 +19,8 @@ import com.google.gson.GsonBuilder;
 /**
  * 
  * This class will connect to the Direction API and request direction from two requested points.
+ * 
+ * TODO: Request Strings must have no spaces in them
  * @author Elliott Hill
  *
  */
@@ -27,23 +29,50 @@ public class RequestDirections {
 	/** API End point to connect to to get directions from one point to another */
 	private static final String API_END_POINT = "https://maps.googleapis.com/maps/api/directions/json";
 	/** Our API key to connect to the API */
-	private static final String API_KEY = "AIzaSyD6wVp9xuWe2ULXw1ghK0FSw8J9OfvTzkw";
+	private static String apiKey = null;
 	/** HttpClient instance to be used across all isntance */
 	private static HttpClient client;
 	/** The returned Api Response from the directions API */
 	private ApiResponse apiResponse;
+	/** Origin Location String e.g. London, UK */
+	private String origin;
+	/** Origin logitude and latitude co-ordinates */
+	private String destination;
+	/** The response code from the directions API */
+	private int responseCode = -1;
+	/** The mode of travel to use in directions */
+	private TravelMode travelMode;
 	
-	// TODO: Add in how to get points A and points B
-	public RequestDirections() {
-		
+	/**
+	 * Create an object to make a request to the Directions API to get directions between two points
+	 * @param origin		A string containing the origin location, either as a place name or 
+	 * 						longitude / latitude location.
+	 * @param destination	A String containing the destination location, either as a place name or
+	 * 						a latitude / longitude location 
+	 * 
+	 */
+	public RequestDirections(String origin, String destination) {
+		this.origin = origin;
+		this.destination = destination;
 	}
 	
 	/**
 	 * Create and execute the API call to the directions API and parse and return the response.
 	 * @return the Api response from calling this Api call
+	 * 
+	 * @throws {@link IllegalArgumentException} if either origin or destination is null
 	 */
 	public ApiResponse getApiResponse() {
-		makeRequest();
+		if (apiKey == null) {
+			throw new IllegalArgumentException("Must provide Api Key");
+		}
+		if (origin == null || destination == null) {
+			throw new IllegalArgumentException("Must provide both origin and destination locations");
+		}
+		// No point making the call again if we've got a response or if we made a call previously
+		if (apiResponse == null && getResponseCode() == -1) {
+			makeRequest();
+		}
 		return apiResponse;
 	}
 	
@@ -66,8 +95,8 @@ public class RequestDirections {
 			ioe.printStackTrace();
 			return;
 		}
-		
-		if (resp.getStatusLine().getStatusCode() == 200) {
+		responseCode = resp.getStatusLine().getStatusCode();
+		if (responseCode == 200) {
 			// Parse the returned response
 			try {
 				HttpEntity e = resp.getEntity();
@@ -102,6 +131,7 @@ public class RequestDirections {
 		
 		return client;
 	}
+
 	
 	/**
 	 * Get the parameters to be appended to the end of the request string
@@ -109,14 +139,94 @@ public class RequestDirections {
 	 * @return the parameters to be appended to the end of the request string
 	 */
 	private String getParameters() {
-		// TODO: Decide mode to use
-		return "?origin=Cambridge,UK&destination=London,UK&sensor=false&key="+getApiKey();
+		String requestParams = "?origin=" + origin + 
+				"&destination=" + destination + 
+				"&sensor=false" +
+				"&key="+getApiKey();
+		
+		if (getTravelMode() != null) {
+			requestParams += "&mode="+getTravelMode().toString().toLowerCase();
+			// Transit requests need travel times 
+			if (getTravelMode() == TravelMode.TRANSIT) {
+				// TODO: Allow users to set Start / End Times
+				requestParams += "&departure_time=" + (System.currentTimeMillis() / 1000);
+				System.out.println(System.currentTimeMillis() / 1000);
+			}
+		}
+		return requestParams;
 	}
 	
 	/**
 	 * Get the API key that we will be using to authenticate with the directions API
 	 */
-	private String getApiKey() {
-		return API_KEY;
+	private static String getApiKey() {
+		return apiKey;
+	}
+	
+	/**
+	 * Set the API key to be used when contacting the directions API
+	 * 
+	 * @param apiKey The API Key String to be passed to the directions API
+	 */
+	public static void setApiKey(String apiKey) {
+		RequestDirections.apiKey = apiKey;
+	}
+
+	/**
+	 * Get the origin location for the requested journey.
+	 * @return the origin location for the requested journey.
+	 */
+	public String getOrigin() {
+		return origin;
+	}
+
+	/**
+	 * Set the origin location for the requested journey. A location is either a human readable 
+	 * place name e.g. "London, UK" or a longitude latitude string seperated by a comma
+	 * @param origin the origin location for the requested journey
+	 */
+	public void setOrigin(String origin) {
+		this.origin = origin;
+	}
+
+	/**
+	 * Get the destination location for the requested journey. 
+	 * @return the destination location for the requested journey.
+	 */
+	public String getDestination() {
+		return destination;
+	}
+
+	/**
+	 * Set the destination location for a requested journey. A location either is a human readable
+	 *  place name e.g. "London, UK" or a longitude latitude string deperated by a comma
+	 * @param destinationLocation
+	 */
+	public void setDestinationLocation(String destination) {
+		this.destination = destination;
+	}
+
+	/**
+	 * Get the HTTP response code from the directions API request call.
+	 * @return the HTTP response code from the directions API request call.
+	 */
+	public int getResponseCode() {
+		return responseCode;
+	}
+
+	/**
+	 * Get the travel mode that will be used for this journey.
+	 * @return the travel mode that will be used for this journey.
+	 */
+	public TravelMode getTravelMode() {
+		return travelMode;
+	}
+
+	/**
+	 * Set the {@link TravelMode} to be used for this journey
+	 * @param travelMode the {@link TravelMode} to be used for this journey
+	 */
+	public void setTravelMode(TravelMode travelMode) {
+		this.travelMode = travelMode;
 	}
 }
